@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Flac searcher</string>
+    <string name="file_change_broadcast" />
+    <string name="title_activity_songlist">ScrollingActivity</string>
+    <string name="large_text">
+    </string>
+    <string name="action_settings">Settings</string>
+    <string name="switch_theme_to">Switch theme to:</string>
+    <string-array name="switch_themes">
+        <item>Default</item>
+        <item>Dark</item>
+        <item>Light</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
