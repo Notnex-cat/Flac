@@ -10,7 +10,6 @@ import android.os.IBinder
 import android.widget.Toast
 import com.example.flacsearcher.adapters.SongListAdapter
 
-
 class PlayMusicService: Service() { 
     
    //var mp: MediaPlayer? = null
