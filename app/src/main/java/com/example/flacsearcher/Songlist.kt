@@ -37,14 +37,11 @@ class Songlist : AppCompatActivity() {
            val songPath = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA))
            songModelData.add(SongModel(songName, songDuration,songPath, songId))
        }
-
             setSupportActionBar(findViewById(R.id.toolbar))
         findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout).title = "Playlist"
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
             Snackbar.make(view, "Start playing", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
-
             }
-
         }
     }

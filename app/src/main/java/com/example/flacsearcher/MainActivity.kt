@@ -48,15 +48,6 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-
-        fun showFragmentSetup() {
-            val setupFragment = PlayFragment()
-            val manager = supportFragmentManager
-            val transaction = manager.beginTransaction()
-            transaction.replace(R.id.fl_wrapper, setupFragment)
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (isNightModeOn) {
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
@@ -71,7 +62,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
         private fun makeCurrentFragment(fragment: Fragment) =
                 supportFragmentManager.beginTransaction().apply {
                     replace(R.id.fl_wrapper, fragment)
@@ -89,6 +79,4 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Жмакни ещё раз, если смелый", Toast.LENGTH_SHORT).show()
             Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 1000)
         }
-
-
 }
