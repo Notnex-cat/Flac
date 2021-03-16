@@ -15,20 +15,17 @@ import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 
 class PlayFragment : Fragment() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
         val appSettingPrefs: SharedPreferences = requireContext().getSharedPreferences("AppSettingPrefs", 0)
         val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
-        var isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
+        val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
             val view: View = inflater.inflate(R.layout.fragment_play, container, false)
-            var mediaPlayer: MediaPlayer = MediaPlayer.create(context, R.raw.qwerty)
+            val mediaPlayer: MediaPlayer = MediaPlayer.create(context, R.raw.qwerty)
 
-            view.play.setOnClickListener() {
+            view.play.setOnClickListener {
                 if (mediaPlayer.isPlaying) {
                     mediaPlayer.pause();
                     play.setImageResource(R.drawable.play);
@@ -44,13 +41,11 @@ class PlayFragment : Fragment() {
            view.darklight.setImageResource(R.drawable.dark);
         }
 
-
         view.darklight.setOnClickListener{
             if (isNightModeOn){
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                 sharedPrefsEdit.putBoolean("NightMode", false)
                 sharedPrefsEdit.apply()
-
             }else{
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 sharedPrefsEdit.putBoolean("NightMode", true)

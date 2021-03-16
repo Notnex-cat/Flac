@@ -14,13 +14,8 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val uri: String = "/storage/emulated/0/Download/mp3rington_club_id_9436.mp3"
-        var mediaPlayer: MediaPlayer? = null
-        mediaPlayer?.setDataSource(uri)
         val view: View = inflater.inflate(R.layout.fragment_settings, container, false)
-        view.play.setOnClickListener() {
-                mediaPlayer?.start();
-            }
+
         return view
     }
 }

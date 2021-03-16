@@ -20,8 +20,8 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
     var allMusicList:ArrayList<String> = ArrayList()
 
     companion object{
-        val MUSICLIST = "musiclist"
-        val MUSICITEMPOS = "pos"
+        const val MUSICLIST = "musiclist"
+        const val MUSICITEMPOS = "pos"
     }
 
     override fun getItemCount(): Int {
@@ -45,7 +45,7 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
                     allMusicList.add(mSongModel[i].mSongPath)
                 }
                 //Toast.makeText(mContext, "SongTitle: "+songName, Toast.LENGTH_SHORT).show()
-                var musicDataIntent = Intent(mContext, PlayMusicService::class.java)
+                val musicDataIntent = Intent(mContext, PlayMusicService::class.java)
                 musicDataIntent.putStringArrayListExtra(MUSICLIST,allMusicList)
                 musicDataIntent.putExtra(MUSICITEMPOS, pos)
                 mContext.startService(musicDataIntent)
@@ -53,24 +53,22 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
         })
     }
 
-    fun toMandS(millis:Long):String{
-        var duration = String.format("%2d:%2d",
+    private fun toMandS(millis: Long): String {
+        return String.format(
+            "%2d:%2d",
             TimeUnit.MILLISECONDS.toMinutes(millis),
-            TimeUnit.MILLISECONDS.toSeconds(millis)-TimeUnit.MINUTES.toSeconds(
+            TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(
                 TimeUnit.MILLISECONDS.toMinutes(millis)
-            ))
-        return duration
+            )
+        )
     }
 
     class SongListViewHolder(itemView: View):RecyclerView.ViewHolder(itemView), View.OnClickListener{
-        var songTV:TextView
-        var durationTV:TextView
-        var albumnArt:ImageView
-        var mCostomItemClickListener:CostomItemClickListener?=null
+        var songTV:TextView = itemView.findViewById(R.id.song_name_tv)
+        var durationTV:TextView = itemView.findViewById(R.id.song_duration_tv)
+        private var albumnArt:ImageView = itemView.findViewById(R.id.al_img_view)
+        private var mCostomItemClickListener:CostomItemClickListener?=null
         init {
-            songTV = itemView.findViewById(R.id.song_name_tv)
-            durationTV = itemView.findViewById(R.id.song_duration_tv)
-            albumnArt = itemView.findViewById(R.id.al_img_view)
             itemView.setOnClickListener(this)
         }
         fun setOnCostomItemClickListener(costomItemClickListener:CostomItemClickListener){

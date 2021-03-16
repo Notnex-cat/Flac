@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.flacsearcher.service
 
 import android.app.Service
@@ -12,8 +14,8 @@ import com.example.flacsearcher.adapters.SongListAdapter
 class PlayMusicService: Service() { 
     
    //var mp: MediaPlayer? = null
-    var currentPos:Int = 0
-    var musicDataList:ArrayList<String> = ArrayList()
+   private var currentPos:Int = 0
+    private var musicDataList:ArrayList<String> = ArrayList()
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -58,8 +60,8 @@ class PlayMusicService: Service() {
 
          val media: MediaPlayer? = null
                  //MediaPlayer.create(this, musicDataList[currentPos])
-         media?.setDataSource("/storage/emulated/0/02.flac");
-       //  media?.prepare()
+         media?.setDataSource("/storage/emulated/0/02.flac")
+        //  media?.prepare()
       // media?.setOnPreparedListener {
 
            media?.start()
