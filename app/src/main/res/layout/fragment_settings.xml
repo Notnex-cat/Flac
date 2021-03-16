@@ -6,9 +6,4 @@
     android:layout_height="match_parent"
     tools:context=".fragments.SettingsFragment">
 
-<Button
-    android:layout_width="wrap_content"
-    android:id="@+id/play"
-    android:layout_height="wrap_content"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

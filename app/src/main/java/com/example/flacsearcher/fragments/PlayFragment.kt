@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
@@ -13,6 +14,7 @@ import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
+
 
 class PlayFragment : Fragment() {
     override fun onCreateView(
@@ -25,6 +27,16 @@ class PlayFragment : Fragment() {
             val view: View = inflater.inflate(R.layout.fragment_play, container, false)
             val mediaPlayer: MediaPlayer = MediaPlayer.create(context, R.raw.qwerty)
 
+        view.play.setOnLongClickListener(OnLongClickListener {
+            if (mediaPlayer!=null){
+                mediaPlayer.stop()
+                play.setImageResource(R.drawable.play);}
+            mediaPlayer.prepareAsync()
+            true
+        })
+if (mediaPlayer!= null){
+    mediaPlayer.stop()
+    mediaPlayer.prepareAsync()
             view.play.setOnClickListener {
                 if (mediaPlayer.isPlaying) {
                     mediaPlayer.pause();
@@ -34,7 +46,7 @@ class PlayFragment : Fragment() {
                     play.setImageResource(R.drawable.pause);
                 }
             }
-
+}
         if (isNightModeOn){
             view.darklight.setImageResource(R.drawable.light);
         }else{
@@ -53,7 +65,10 @@ class PlayFragment : Fragment() {
 
             }
         }
-            view.select.setOnClickListener {
+
+
+
+        view.select.setOnClickListener {
                 val intent = Intent(activity, Songlist::class.java)
                 startActivity(intent)}
             return view

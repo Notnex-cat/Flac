@@ -25,10 +25,7 @@ class PlayMusicService: Service() {
         Toast.makeText(this, "" + musicDataList[currentPos], Toast.LENGTH_SHORT).show()
 
         val path: String = Environment.getExternalStorageDirectory().toString() + ""
-
-
-
-
+        
       //val uriSong: String = ContentUris.withAppendedId(musicDataList[currentPos], 140) as String
 
      //  val mediaPlayer: MediaPlayer = MediaPlayer().apply {
