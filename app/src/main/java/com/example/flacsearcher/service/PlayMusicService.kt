@@ -12,10 +12,11 @@ import android.widget.Toast
 import com.example.flacsearcher.adapters.SongListAdapter
 
 class PlayMusicService: Service() {
-    private var lastSong: String? = null
+    var lastSong: String? = null
     private var pref: SharedPreferences? = null
     var currentSong: String? = null
     var currentPos:Int = 0
+    var need: String?= null
     var musicDataList:ArrayList<String> = ArrayList()
     private var mp:MediaPlayer?=null
     override fun onBind(intent: Intent?): IBinder? {
@@ -48,6 +49,7 @@ class PlayMusicService: Service() {
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
         lastSong = pref?.getString("last", null)
         Toast.makeText(this, "last song is:" + lastSong, Toast.LENGTH_SHORT).show()
+        need = lastSong
     }
 
     private fun saveData(res: String){
@@ -55,7 +57,6 @@ class PlayMusicService: Service() {
         editor?.putString("last", res)
         editor?.apply()
     }
-
 }
 
 

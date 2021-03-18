@@ -33,7 +33,9 @@ class PlayFragment : Fragment() {
         val view: View = inflater.inflate(R.layout.fragment_play, container, false)
         val musicDataList = playMusicService.musicDataList
         val currentPos = playMusicService.currentPos
+       val need = playMusicService.need
         view.song_name.text = lastSong
+        Toast.makeText(activity, "last song is:" + need, Toast.LENGTH_SHORT).show()
 
         view.play.setOnLongClickListener {
             if (mp!!.isPlaying) {
