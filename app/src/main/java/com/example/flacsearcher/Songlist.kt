@@ -31,11 +31,10 @@ class Songlist : AppCompatActivity() {
         val songCursor: Cursor? = contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null, null)
        while (songCursor != null && songCursor.moveToNext()) {
-           val songId: Long = songCursor.getLong(songCursor.getColumnIndex(MediaStore.Audio.Media._ID))
            val songName = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
            val songDuration = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
            val songPath = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-           songModelData.add(SongModel(songName, songDuration,songPath, songId))
+           songModelData.add(SongModel(songName, songDuration,songPath))
        }
             setSupportActionBar(findViewById(R.id.toolbar))
         findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout).title = "Playlist"

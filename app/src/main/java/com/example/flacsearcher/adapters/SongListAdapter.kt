@@ -17,7 +17,8 @@ import java.util.concurrent.TimeUnit
 class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):RecyclerView.Adapter<SongListAdapter.SongListViewHolder>() {
     var mContext = context
     var mSongModel = SongModel
-    var allMusicList:ArrayList<String> = ArrayList()
+    var allMusicList: ArrayList<String> = ArrayList()
+    var songName: String ?=null
 
     companion object{
         const val MUSICLIST = "musiclist"
@@ -35,16 +36,15 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
 
     override fun onBindViewHolder(holder: SongListViewHolder, position: Int) {
         val model = mSongModel[position]
-        val songName = model.mSongName
-        val songDuration = toMandS( model.mSongDuration.toLong())
+        songName = model.mSongName
+        val songDuration = toMandS(model.mSongDuration.toLong())
         holder.songTV.text = songName
         holder.durationTV.text = songDuration
-        holder.setOnCostomItemClickListener(object : CostomItemClickListener {
+        holder.setOnCostomItemClickListener(object: CostomItemClickListener {
             override fun onCostomItemClick(view: View, pos: Int) {
                 for (i in 0 until mSongModel.size){
                     allMusicList.add(mSongModel[i].mSongPath)
                 }
-                //Toast.makeText(mContext, "SongTitle: "+songName, Toast.LENGTH_SHORT).show()
                 val musicDataIntent = Intent(mContext, PlayMusicService::class.java)
                 musicDataIntent.putStringArrayListExtra(MUSICLIST,allMusicList)
                 musicDataIntent.putExtra(MUSICITEMPOS, pos)

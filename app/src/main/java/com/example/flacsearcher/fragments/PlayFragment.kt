@@ -11,10 +11,15 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
+import com.example.flacsearcher.adapters.SongListAdapter
+import com.example.flacsearcher.service.PlayMusicService
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 
 class PlayFragment : Fragment() {
+    var playMusicService = PlayMusicService()
+    //var songListAdapter = SongListAdapter()
+    private var mp:MediaPlayer?=null
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -23,23 +28,30 @@ class PlayFragment : Fragment() {
         val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
         val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
             val view: View = inflater.inflate(R.layout.fragment_play, container, false)
-            val mediaPlayer: MediaPlayer = MediaPlayer.create(context, R.raw.qwerty)
+        var musicDataList = playMusicService.musicDataList
+        var currentPos = playMusicService.currentPos
+        var currentSong = playMusicService.currentSong
+        //var songName = songListAdapter.songName
+
+      //  view.song_name.text = songName
 
         view.play.setOnLongClickListener {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.stop()
+            if (mp!!.isPlaying) {
+                mp!!.stop()
                 play.setImageResource(R.drawable.play);
             }
-            mediaPlayer.prepareAsync()
+            mp!!.prepareAsync()
             true
         }
             view.play.setOnClickListener {
-                if (!mediaPlayer.isPlaying) {
-                    mediaPlayer.start()
-                    view.play.setImageResource(R.drawable.pause);
-                } else {
-                    mediaPlayer.pause();
+                if (mp!!.isPlaying) {
+                    mp!!.pause();
                     view.play.setImageResource(R.drawable.play);
+                } else {
+                    mp!!.setDataSource(musicDataList[1])
+                    mp!!.prepare()
+                    mp!!.start()
+                    view.play.setImageResource(R.drawable.pause);
                 }
             }
         if (isNightModeOn){
@@ -65,4 +77,4 @@ class PlayFragment : Fragment() {
                 startActivity(intent)}
             return view
         }
-    }
+}
