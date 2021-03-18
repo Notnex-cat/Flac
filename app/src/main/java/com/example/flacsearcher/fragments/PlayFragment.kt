@@ -1,5 +1,6 @@
 package com.example.flacsearcher.fragments
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
@@ -7,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
@@ -18,7 +20,8 @@ import kotlinx.android.synthetic.main.fragment_play.view.*
 
 class PlayFragment : Fragment() {
     var playMusicService = PlayMusicService()
-    //var songListAdapter = SongListAdapter()
+    private var pref: SharedPreferences? = null
+    private var lastSong: String? = null
     private var mp:MediaPlayer?=null
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -27,13 +30,10 @@ class PlayFragment : Fragment() {
         val appSettingPrefs: SharedPreferences = requireContext().getSharedPreferences("AppSettingPrefs", 0)
         val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
         val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
-            val view: View = inflater.inflate(R.layout.fragment_play, container, false)
-        var musicDataList = playMusicService.musicDataList
-        var currentPos = playMusicService.currentPos
-        var currentSong = playMusicService.currentSong
-        //var songName = songListAdapter.songName
-
-      //  view.song_name.text = songName
+        val view: View = inflater.inflate(R.layout.fragment_play, container, false)
+        val musicDataList = playMusicService.musicDataList
+        val currentPos = playMusicService.currentPos
+        view.song_name.text = lastSong
 
         view.play.setOnLongClickListener {
             if (mp!!.isPlaying) {
@@ -48,7 +48,7 @@ class PlayFragment : Fragment() {
                     mp!!.pause();
                     view.play.setImageResource(R.drawable.play);
                 } else {
-                    mp!!.setDataSource(musicDataList[1])
+                    mp!!.setDataSource(musicDataList[currentPos])
                     mp!!.prepare()
                     mp!!.start()
                     view.play.setImageResource(R.drawable.pause);
