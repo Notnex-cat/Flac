@@ -28,7 +28,7 @@ class PlayMusicService: Service() {
             mp = null
         }
         mp = MediaPlayer()
-        mp!!.setDataSource( musicDataList[currentPos])
+        mp!!.setDataSource(musicDataList[currentPos])
         mp!!.prepare()
         mp!!.start()
 
