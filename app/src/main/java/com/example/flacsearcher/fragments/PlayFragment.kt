@@ -1,6 +1,5 @@
 package com.example.flacsearcher.fragments
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
@@ -13,14 +12,12 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
-import com.example.flacsearcher.adapters.SongListAdapter
 import com.example.flacsearcher.service.PlayMusicService
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 
 class PlayFragment : Fragment() {
-    var playMusicService = PlayMusicService()
-    private var pref: SharedPreferences? = null
+    private var playMusicService = PlayMusicService()
     private var lastSong: String? = null
     private var mp:MediaPlayer?=null
     override fun onCreateView(
@@ -33,33 +30,33 @@ class PlayFragment : Fragment() {
         val view: View = inflater.inflate(R.layout.fragment_play, container, false)
         val musicDataList = playMusicService.musicDataList
         val currentPos = playMusicService.currentPos
-       val need = playMusicService.need
+        lastSong = playMusicService.lastSong
         view.song_name.text = lastSong
-        Toast.makeText(activity, "last song is:" + need, Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, "last song is:$lastSong", Toast.LENGTH_SHORT).show()
 
         view.play.setOnLongClickListener {
             if (mp!!.isPlaying) {
                 mp!!.stop()
-                play.setImageResource(R.drawable.play);
+                play.setImageResource(R.drawable.play)
             }
             mp!!.prepareAsync()
             true
         }
             view.play.setOnClickListener {
                 if (mp!!.isPlaying) {
-                    mp!!.pause();
-                    view.play.setImageResource(R.drawable.play);
+                    mp!!.pause()
+                    view.play.setImageResource(R.drawable.play)
                 } else {
                     mp!!.setDataSource(musicDataList[currentPos])
                     mp!!.prepare()
                     mp!!.start()
-                    view.play.setImageResource(R.drawable.pause);
+                    view.play.setImageResource(R.drawable.pause)
                 }
             }
         if (isNightModeOn){
-            view.darklight.setImageResource(R.drawable.light);
+            view.darklight.setImageResource(R.drawable.light)
         }else{
-           view.darklight.setImageResource(R.drawable.dark);
+           view.darklight.setImageResource(R.drawable.dark)
         }
 
         view.darklight.setOnClickListener{
