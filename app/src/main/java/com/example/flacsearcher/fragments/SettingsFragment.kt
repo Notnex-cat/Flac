@@ -21,19 +21,6 @@ class SettingsFragment : Fragment() {
     ): View {
         val view: View = inflater.inflate(R.layout.fragment_settings, container, false)
 
-        output = Environment.getExternalStorageDirectory().absolutePath + "/recording.mp3"
-        Log.e(TAG, "URL:" + output);
-        Log.e(TAG, "exists: " + output.toString());
-
-view.start.setOnClickListener {
-
-    val media: MediaPlayer? = null
-    //MediaPlayer.create(this, musicDataList[currentPos])
-    if (media != null) {
-        media.setDataSource(output)
-    }
-    media!!.start()
-}
         return view
     }
 }
