@@ -20,12 +20,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
+
+    var playing: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val playFragment = PlayFragment()
         val webSearchFragment = WebSearchFragment()
         val settingsFragment = SettingsFragment()
+
         val appSettingPrefs: SharedPreferences = getSharedPreferences("AppSettingPrefs", 0)
         val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
         val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", true)

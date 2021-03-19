@@ -26,6 +26,7 @@ class Songlist : AppCompatActivity() {
     private var songModelData: ArrayList<SongModel> = ArrayList()
     private var songListAdapter: SongListAdapter? = null
     private var mp: MediaPlayer?=null
+
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,15 +40,20 @@ class Songlist : AppCompatActivity() {
         recycle_view.layoutManager = layoutManager
         recycle_view.adapter = songListAdapter
 
-        val songCursor: Cursor? = contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                null, null, null, null)
-       while (songCursor != null && songCursor.moveToNext()) {
-           val songName = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-           val songDuration = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-           val songPath = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-           songModelData.add(SongModel(songName, songDuration,songPath))
-       }
-            setSupportActionBar(findViewById(R.id.toolbar))
+        val songCursor: Cursor? = contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            null, null, null, null
+        )
+        while (songCursor != null && songCursor.moveToNext()) {
+            val songName =
+                songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+            val songDuration =
+                songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
+            val songPath =
+                songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+            songModelData.add(SongModel(songName, songDuration, songPath))
+        }
+        setSupportActionBar(findViewById(R.id.toolbar))
         findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout).title = "Playlist"
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
             if (mp == null) {
@@ -56,13 +62,15 @@ class Songlist : AppCompatActivity() {
                 mp!!.prepare()
                 mp!!.start()
                 fab.setImageResource(R.drawable.pause)
-                Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-            }else{
+                Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+            } else {
                 mp!!.stop()
                 fab.setImageResource(R.drawable.play)
                 mp!!.prepare()
                 mp = null
-                Snackbar.make(view, "Stop playing...", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                Snackbar.make(view, "Stop playing...", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
             }
         }
     }

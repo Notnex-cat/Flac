@@ -39,7 +39,8 @@ class PlayMusicService: Service() {
         mp = MediaPlayer()
         mp!!.setDataSource(musicDataList[currentPos])
         mp!!.prepare()
-        mp!!.start()
+        mp!!.setOnPreparedListener { 
+        mp!!.start()}
         saveData(lastSong.toString())
         return super.onStartCommand(intent, flags, startId)
     }
@@ -56,10 +57,3 @@ class PlayMusicService: Service() {
         editor?.apply()
     }
 }
-
-
-
-
-
-
-

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flacsearcher.Interface.CostomItemClickListener
 import com.example.flacsearcher.R
@@ -38,11 +39,12 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
         val model = mSongModel[position]
         songName = model.mSongName
         val songDuration = toMandS(model.mSongDuration.toLong())
+
         holder.songTV.text = songName
         holder.durationTV.text = songDuration
         holder.setOnCostomItemClickListener(object: CostomItemClickListener {
             override fun onCostomItemClick(view: View, pos: Int) {
-                for (i in 0 until mSongModel.size){
+                for (i in 0 until mSongModel.size) {
                     allMusicList.add(mSongModel[i].mSongPath)
                 }
                 val musicDataIntent = Intent(mContext, PlayMusicService::class.java)
@@ -64,8 +66,8 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
     }
 
     class SongListViewHolder(itemView: View):RecyclerView.ViewHolder(itemView), View.OnClickListener{
-        var songTV:TextView = itemView.findViewById(R.id.song_name_tv)
-        var durationTV:TextView = itemView.findViewById(R.id.song_duration_tv)
+        var songTV: TextView = itemView.findViewById(R.id.song_name_tv)
+        var durationTV: TextView = itemView.findViewById(R.id.song_duration_tv)
         private var albumnArt:ImageView = itemView.findViewById(R.id.al_img_view)
         private var mCostomItemClickListener:CostomItemClickListener?=null
         init {
