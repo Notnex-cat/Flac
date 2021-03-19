@@ -1,9 +1,13 @@
 package com.example.flacsearcher
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.database.Cursor
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flacsearcher.adapters.SongListAdapter
@@ -11,17 +15,24 @@ import com.example.flacsearcher.model.SongModel
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_songlist.*
 import kotlinx.android.synthetic.main.content_scrolling.*
+import kotlinx.android.synthetic.main.fragment_play.view.*
 
 @Suppress("DEPRECATION")
 class Songlist : AppCompatActivity() {
-
+    private var lastSong: String? = null
+    private var pref: SharedPreferences? = null
     private var songModelData: ArrayList<SongModel> = ArrayList()
     private var songListAdapter: SongListAdapter? = null
+    private var mp: MediaPlayer?=null
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_songlist)
+        pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
+        lastSong = pref?.getString("last", null)
+        Toast.makeText(this, "last song is:$lastSong", Toast.LENGTH_SHORT).show()
 
         songListAdapter = SongListAdapter(songModelData, applicationContext)
         val layoutManager = LinearLayoutManager(applicationContext)
@@ -39,8 +50,20 @@ class Songlist : AppCompatActivity() {
             setSupportActionBar(findViewById(R.id.toolbar))
         findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout).title = "Playlist"
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
-            Snackbar.make(view, "Start playing", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            if (mp == null) {
+                mp = MediaPlayer()
+                mp!!.setDataSource(lastSong)
+                mp!!.prepare()
+                mp!!.start()
+                fab.setImageResource(R.drawable.pause)
+                Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            }else{
+                mp!!.stop()
+                fab.setImageResource(R.drawable.play)
+                mp!!.prepare()
+                mp = null
+                Snackbar.make(view, "Stop playing...", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             }
         }
     }
+}

@@ -15,9 +15,9 @@ class PlayMusicService: Service() {
     var lastSong: String? = null
     private var pref: SharedPreferences? = null
     var currentSong: String? = null
-    var currentPos:Int = 0
-    var musicDataList:ArrayList<String> = ArrayList()
-    private var mp:MediaPlayer?=null
+    var currentPos: Int = 0
+    var musicDataList: ArrayList<String> = ArrayList()
+    private var mp: MediaPlayer? = null
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -31,7 +31,7 @@ class PlayMusicService: Service() {
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
 
 
-        if (mp!=null){
+        if (mp != null) {
             mp!!.stop()
             mp!!.release()
             mp = null
@@ -47,10 +47,10 @@ class PlayMusicService: Service() {
     private fun loadData() {
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
         lastSong = pref?.getString("last", null)
-        Toast.makeText(this, "last song is:" + lastSong, Toast.LENGTH_SHORT).show()
+        // Toast.makeText(this, "last song is:" + lastSong, Toast.LENGTH_SHORT).show()
     }
 
-    private fun saveData(res: String){
+    private fun saveData(res: String) {
         val editor = pref?.edit()
         editor?.putString("last", res)
         editor?.apply()
