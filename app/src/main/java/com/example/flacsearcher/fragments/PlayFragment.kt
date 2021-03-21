@@ -49,9 +49,9 @@ class PlayFragment() : Fragment(), Parcelable {
 
         view.currentTime.text = toMandS(time!!.toLong())
         view.songmax.text = toMandS(timeMax!!.toLong())
+
         view.seekbar.max = timeMax as Int
         view.seekbar.progress = time as Int
-
         mp = MediaPlayer()
         mp?.setDataSource(lastSong)
         mp?.prepareAsync()
@@ -59,7 +59,6 @@ class PlayFragment() : Fragment(), Parcelable {
     view.play.setOnLongClickListener {   // stop button
         if (mp!!.isPlaying) {
             mp!!.stop()
-            currentTime.text = "0:00"
             seekbar.progress = 0
             time = 0
             play.setImageResource(R.drawable.play)
@@ -139,13 +138,13 @@ class PlayFragment() : Fragment(), Parcelable {
                 seekbar.progress = mp!!.currentPosition
                     lastTime = mp!!.currentPosition
                     saveData(lastTime!!.toInt())
-                    time = pref?.getInt("currentTime", 0)
+                    time = pref?.getInt("currentTim", 0)
                 handler.postDelayed(this,250)
                     timemax = mp!!.duration
                     saveData1(timemax!!.toInt())
                     currentTime.text = toMandS(mp!!.currentPosition.toLong())
             }catch (e: Exception){
-                //seekbar.progress = 0
+               // seekbar.progress = 0
             }
             }
         }, 0)
