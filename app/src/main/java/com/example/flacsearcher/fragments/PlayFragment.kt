@@ -25,6 +25,10 @@ class PlayFragment() : Fragment(), Parcelable {
     private var lastSong: String? = null
     private var pref: SharedPreferences? = null
     private var mp: MediaPlayer?=null
+    private var lastTime: Int? = null  // current time save
+    private var time: Int? = null  // current time read
+    private var timeMax: Int? = null//read
+    private var timemax: Int? = null //save
 
     constructor(parcel: Parcel) : this() {
         lastSong = parcel.readString()
@@ -34,13 +38,19 @@ class PlayFragment() : Fragment(), Parcelable {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-       // Toast.makeText(activity, "Play Fragment started", Toast.LENGTH_SHORT).show()
     val appSettingPrefs: SharedPreferences = requireContext().getSharedPreferences("AppSettingPrefs", 0)
     val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
     val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
     val view: View = inflater.inflate(R.layout.fragment_play, container, false)
         pref = this.activity?.getSharedPreferences("Table", Context.MODE_PRIVATE)
         lastSong = pref?.getString("last", null)
+        time = pref?.getInt("currentTim", 0)
+        timeMax = pref?.getInt("timMax", 0)
+
+        view.currentTime.text = toMandS(time!!.toLong())
+        view.songmax.text = toMandS(timeMax!!.toLong())
+        view.seekbar.max = timeMax as Int
+        view.seekbar.progress = time as Int
 
         mp = MediaPlayer()
         mp?.setDataSource(lastSong)
@@ -49,8 +59,9 @@ class PlayFragment() : Fragment(), Parcelable {
     view.play.setOnLongClickListener {   // stop button
         if (mp!!.isPlaying) {
             mp!!.stop()
-            mp!!.reset()
-            mp!!.release()
+            currentTime.text = "0:00"
+            seekbar.progress = 0
+            time = 0
             play.setImageResource(R.drawable.play)
         }
         mp?.prepareAsync()
@@ -60,6 +71,7 @@ class PlayFragment() : Fragment(), Parcelable {
     view.play.setOnClickListener { //play pause
         if (!mp!!.isPlaying) {
            mp?.start()
+            mp?.seekTo(time!!)
             initializeSeekBar()
             view.songmax.text = toMandS(mp!!.duration.toLong())
             view.play.setImageResource(R.drawable.pause)
@@ -68,7 +80,7 @@ class PlayFragment() : Fragment(), Parcelable {
             view.play.setImageResource(R.drawable.play)
             }
         }
-
+        lastTime = mp!!.currentPosition
         view.loop.setOnClickListener {
             mp?.isLooping
         }
@@ -108,7 +120,16 @@ class PlayFragment() : Fragment(), Parcelable {
         }
             return view
         }
-
+    private fun saveData(currentTim: Int) {
+        val editor = pref?.edit()
+        editor?.putInt("currentTim", currentTim)
+        editor?.apply()
+    }
+    private fun saveData1(timMax: Int) {
+        val editor = pref?.edit()
+        editor?.putInt("timMax", timMax)
+        editor?.apply()
+    }
     private fun initializeSeekBar() {
         seekbar.max = mp!!.duration
         val handler = Handler()
@@ -116,13 +137,21 @@ class PlayFragment() : Fragment(), Parcelable {
             override fun run() {
                 try {
                 seekbar.progress = mp!!.currentPosition
-                handler.postDelayed(this,1000)
+                    lastTime = mp!!.currentPosition
+                    saveData(lastTime!!.toInt())
+                    time = pref?.getInt("currentTime", 0)
+                handler.postDelayed(this,250)
+                    timemax = mp!!.duration
+                    saveData1(timemax!!.toInt())
+                    currentTime.text = toMandS(mp!!.currentPosition.toLong())
             }catch (e: Exception){
-                seekbar.progress = 0
+                //seekbar.progress = 0
             }
             }
         }, 0)
     }
+
+
 
     private fun toMandS(millis: Long): String {
         return String.format(
@@ -134,6 +163,8 @@ class PlayFragment() : Fragment(), Parcelable {
         )
     }
 
+
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(lastSong)
     }
@@ -141,6 +172,7 @@ class PlayFragment() : Fragment(), Parcelable {
     override fun describeContents(): Int {
         return 0
     }
+
 
     companion object CREATOR : Parcelable.Creator<PlayFragment> {
         override fun createFromParcel(parcel: Parcel): PlayFragment {

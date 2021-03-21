@@ -49,7 +49,6 @@ class PlayMusicService: Service() {
     private fun loadData() {
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
         lastSong = pref?.getString("last", null)
-        // Toast.makeText(this, "last song is:" + lastSong, Toast.LENGTH_SHORT).show()
     }
 
     private fun saveData(res: String) {
