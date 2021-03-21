@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flacsearcher.Interface.CostomItemClickListener
 import com.example.flacsearcher.R
@@ -16,10 +15,11 @@ import com.example.flacsearcher.service.PlayMusicService
 import java.util.concurrent.TimeUnit
 
 class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):RecyclerView.Adapter<SongListAdapter.SongListViewHolder>() {
+
     var mContext = context
     var mSongModel = SongModel
     var allMusicList: ArrayList<String> = ArrayList()
-    var songName: String ?=null
+    private var songName: String ?=null
 
     companion object{
         const val MUSICLIST = "musiclist"
@@ -36,6 +36,7 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
     }
 
     override fun onBindViewHolder(holder: SongListViewHolder, position: Int) {
+
         val model = mSongModel[position]
         songName = model.mSongName
         val songDuration = toMandS(model.mSongDuration.toLong())
@@ -81,17 +82,6 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
             this.mCostomItemClickListener!!.onCostomItemClick(v!!, adapterPosition)
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

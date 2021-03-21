@@ -28,18 +28,17 @@ class PlayFragment : Fragment() {
     private var lastSong: String? = null
     private var pref: SharedPreferences? = null
     private var mp: MediaPlayer?=null
-    private var songListAdapter: SongListAdapter? = null
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        Toast.makeText(activity, "Play Fragment started", Toast.LENGTH_SHORT).show()
     val appSettingPrefs: SharedPreferences = requireContext().getSharedPreferences("AppSettingPrefs", 0)
     val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
     val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
     val view: View = inflater.inflate(R.layout.fragment_play, container, false)
     pref = this.activity?.getSharedPreferences("Table", Context.MODE_PRIVATE)
     lastSong = pref?.getString("last", null)
-    // Toast.makeText(activity, "last song is:$lastSong", Toast.LENGTH_SHORT).show()
 
     //val playingMusic = playMusicService!!::playingMusic
 
@@ -113,6 +112,11 @@ class PlayFragment : Fragment() {
         )
 
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Toast.makeText(activity, "PlayFragment died", Toast.LENGTH_SHORT).show()
     }
 }
 

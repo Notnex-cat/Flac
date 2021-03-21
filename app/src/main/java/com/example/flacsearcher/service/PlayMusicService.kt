@@ -23,6 +23,7 @@ class PlayMusicService: Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Toast.makeText(this, "PlayMusicService start", Toast.LENGTH_SHORT).show()
         loadData()
         musicDataList = intent!!.getStringArrayListExtra(SongListAdapter.MUSICLIST)!!
         currentPos = intent.getIntExtra(SongListAdapter.MUSICITEMPOS, 0)
@@ -55,5 +56,10 @@ class PlayMusicService: Service() {
         val editor = pref?.edit()
         editor?.putString("last", res)
         editor?.apply()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Toast.makeText(this, "PlayMusicService died", Toast.LENGTH_SHORT).show()
     }
 }
