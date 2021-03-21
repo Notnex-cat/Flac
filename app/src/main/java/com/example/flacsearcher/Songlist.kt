@@ -17,7 +17,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_songlist.*
 import kotlinx.android.synthetic.main.content_scrolling.*
-import kotlinx.android.synthetic.main.fragment_play.view.*
 
 @Suppress("DEPRECATION")
 class Songlist : AppCompatActivity() {
@@ -65,10 +64,8 @@ class Songlist : AppCompatActivity() {
                 Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             } else {
-                mp!!.stop()
+                mp?.pause()
                 fab.setImageResource(R.drawable.play)
-                mp!!.prepare()
-                mp = null
                 Snackbar.make(view, "Stop playing...", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             }

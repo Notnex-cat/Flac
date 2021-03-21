@@ -6,76 +6,72 @@ import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
-import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
-import com.example.flacsearcher.adapters.SongListAdapter
-import com.example.flacsearcher.service.PlayMusicService
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 import java.util.concurrent.TimeUnit
 
 @Suppress("DEPRECATION")
-class PlayFragment : Fragment() {
+class PlayFragment() : Fragment(), Parcelable {
     private var lastSong: String? = null
     private var pref: SharedPreferences? = null
     private var mp: MediaPlayer?=null
+
+    constructor(parcel: Parcel) : this() {
+        lastSong = parcel.readString()
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        Toast.makeText(activity, "Play Fragment started", Toast.LENGTH_SHORT).show()
+       // Toast.makeText(activity, "Play Fragment started", Toast.LENGTH_SHORT).show()
     val appSettingPrefs: SharedPreferences = requireContext().getSharedPreferences("AppSettingPrefs", 0)
     val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
     val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", false)
     val view: View = inflater.inflate(R.layout.fragment_play, container, false)
-    pref = this.activity?.getSharedPreferences("Table", Context.MODE_PRIVATE)
-    lastSong = pref?.getString("last", null)
+        pref = this.activity?.getSharedPreferences("Table", Context.MODE_PRIVATE)
+        lastSong = pref?.getString("last", null)
 
-    //val playingMusic = playMusicService!!::playingMusic
+        mp = MediaPlayer()
+        mp?.setDataSource(lastSong)
+        mp?.prepareAsync()
 
     view.play.setOnLongClickListener {   // stop button
-        if (mp != null) {
+        if (mp!!.isPlaying) {
             mp!!.stop()
-            mp = null
+            mp!!.reset()
+            mp!!.release()
             play.setImageResource(R.drawable.play)
         }
-        mp!!.prepareAsync()
+        mp?.prepareAsync()
         true
     }
 
     view.play.setOnClickListener { //play pause
-        if (mp == null) {
-            mp = MediaPlayer()
-            mp!!.setDataSource(lastSong)
-            mp!!.prepare()
-            mp!!.start()
+        if (!mp!!.isPlaying) {
+           mp?.start()
+            initializeSeekBar()
             view.songmax.text = toMandS(mp!!.duration.toLong())
-            //initializeSeekBar()
             view.play.setImageResource(R.drawable.pause)
         } else {
-            mp!!.pause()
+           mp?.pause()
             view.play.setImageResource(R.drawable.play)
             }
         }
 
-       /* seekbar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) mp?.seekTo(progress)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-        })*/
+        view.loop.setOnClickListener {
+            mp?.isLooping
+        }
 
             if (isNightModeOn){
             view.darklight.setImageResource(R.drawable.light)
@@ -94,6 +90,17 @@ class PlayFragment : Fragment() {
                 sharedPrefsEdit.apply()
             }
         }
+        view.seekbar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(p0: SeekBar?, pos: Int, changed: Boolean) {
+                if (changed){
+                    mp!!.seekTo(pos)
+                }
+            }
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+            }
+        })
 
         view.select.setOnClickListener {
                 val intent = Intent(activity, Songlist::class.java)
@@ -101,6 +108,21 @@ class PlayFragment : Fragment() {
         }
             return view
         }
+
+    private fun initializeSeekBar() {
+        seekbar.max = mp!!.duration
+        val handler = Handler()
+        handler.postDelayed(object: Runnable{
+            override fun run() {
+                try {
+                seekbar.progress = mp!!.currentPosition
+                handler.postDelayed(this,1000)
+            }catch (e: Exception){
+                seekbar.progress = 0
+            }
+            }
+        }, 0)
+    }
 
     private fun toMandS(millis: Long): String {
         return String.format(
@@ -110,28 +132,23 @@ class PlayFragment : Fragment() {
                 TimeUnit.MILLISECONDS.toMinutes(millis)
             )
         )
-
-
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Toast.makeText(activity, "PlayFragment died", Toast.LENGTH_SHORT).show()
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(lastSong)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<PlayFragment> {
+        override fun createFromParcel(parcel: Parcel): PlayFragment {
+            return PlayFragment(parcel)
+        }
+
+        override fun newArray(size: Int): Array<PlayFragment?> {
+            return arrayOfNulls(size)
+        }
     }
 }
-
-    /* private fun initializeSeekBar(){
-         seekbar.max = totalTime!!
-         song_name.text = getString((totalTime!!))
-
-         val handler = Handler()
-         handler.postDelayed(object: Runnable{
-             override fun run() {
-                 try {
-                 seekbar.progress = mp!!.currentPosition
-                 handler.postDelayed(this, 1000)
-                 }catch (e: Exception){
-                     seekbar.progress = 0
-                 }
-             }
-         },0)*/
