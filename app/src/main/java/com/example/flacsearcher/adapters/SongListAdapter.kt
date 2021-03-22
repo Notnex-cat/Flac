@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flacsearcher.Interface.CostomItemClickListener
 import com.example.flacsearcher.R
@@ -82,12 +83,4 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
             this.mCostomItemClickListener!!.onCostomItemClick(v!!, adapterPosition)
         }
     }
-
-
-
-
-
-
-
-
 }

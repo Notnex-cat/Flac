@@ -47,6 +47,7 @@ class PlayFragment() : Fragment(), Parcelable {
         time = pref?.getInt("currentTim", 0)
         timeMax = pref?.getInt("timMax", 0)
 
+
         view.currentTime.text = toMandS(time!!.toLong())
         view.songmax.text = toMandS(timeMax!!.toLong())
 
@@ -81,7 +82,7 @@ class PlayFragment() : Fragment(), Parcelable {
         }
         lastTime = mp!!.currentPosition
         view.loop.setOnClickListener {
-            mp?.isLooping
+            mp?.isLooping = true
         }
 
             if (isNightModeOn){
@@ -150,8 +151,6 @@ class PlayFragment() : Fragment(), Parcelable {
         }, 0)
     }
 
-
-
     private fun toMandS(millis: Long): String {
         return String.format(
             "%2d:%2d",
@@ -161,8 +160,6 @@ class PlayFragment() : Fragment(), Parcelable {
             )
         )
     }
-
-
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(lastSong)
@@ -182,4 +179,5 @@ class PlayFragment() : Fragment(), Parcelable {
             return arrayOfNulls(size)
         }
     }
+
 }

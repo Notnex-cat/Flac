@@ -23,13 +23,13 @@ class PlayMusicService: Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Toast.makeText(this, "PlayMusicService start", Toast.LENGTH_SHORT).show()
         loadData()
         musicDataList = intent!!.getStringArrayListExtra(SongListAdapter.MUSICLIST)!!
         currentPos = intent.getIntExtra(SongListAdapter.MUSICITEMPOS, 0)
         currentSong = musicDataList[currentPos]
         lastSong = musicDataList[currentPos]
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
+        val poss: Int = currentPos
 
 
         if (mp != null) {
@@ -43,6 +43,7 @@ class PlayMusicService: Service() {
         mp!!.setOnPreparedListener { 
         mp!!.start()}
         saveData(lastSong.toString())
+        savePos(poss.toInt())
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -56,9 +57,9 @@ class PlayMusicService: Service() {
         editor?.putString("last", res)
         editor?.apply()
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Toast.makeText(this, "PlayMusicService died", Toast.LENGTH_SHORT).show()
+    private fun savePos(pos: Int) {
+        val editor = pref?.edit()
+        editor?.putInt("pos", pos)
+        editor?.apply()
     }
 }
