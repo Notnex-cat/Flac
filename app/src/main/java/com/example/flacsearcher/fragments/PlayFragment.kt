@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,9 +17,12 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
+import com.example.flacsearcher.adapters.SongListAdapter
+import com.example.flacsearcher.service.PlayMusicService
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 import java.util.concurrent.TimeUnit
+
 
 @Suppress("DEPRECATION")
 class PlayFragment() : Fragment(), Parcelable {
@@ -27,8 +31,11 @@ class PlayFragment() : Fragment(), Parcelable {
     private var mp: MediaPlayer?=null
     private var lastTime: Int? = null  // current time save
     private var time: Int? = null  // current time read
+    private var currentPos: Int = 0
     private var timeMax: Int? = null//read
     private var timemax: Int? = null //save
+    private var musicDataList: ArrayList<String> = ArrayList()
+    private var lastso: String? = null
 
     constructor(parcel: Parcel) : this() {
         lastSong = parcel.readString()
@@ -46,16 +53,25 @@ class PlayFragment() : Fragment(), Parcelable {
         lastSong = pref?.getString("last", null)
         time = pref?.getInt("currentTim", 0)
         timeMax = pref?.getInt("timMax", 0)
-
-
+        fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+            musicDataList = intent!!.getStringArrayListExtra(SongListAdapter.MUSICLIST)!!
+           currentPos = intent.getIntExtra(PlayMusicService.poss, 0)
+            lastso = intent.getStringExtra(PlayMusicService.lasts)
+           /* val fragmentTransaction: FragmentTransaction = requireFragmentManager().beginTransaction()
+            fragmentTransaction.detach(PlayFragment)
+            fragmentTransaction.attach(PlayFragment)
+            fragmentTransaction.commit()*/
+           return onStartCommand(intent, flags, startId)
+        }
         view.currentTime.text = toMandS(time!!.toLong())
         view.songmax.text = toMandS(timeMax!!.toLong())
-
+        Log.d("rtfrt1", currentPos.toString())
+        Log.d("rtfrt2", lastso.toString())
         view.seekbar.max = timeMax as Int
         view.seekbar.progress = time as Int
         mp = MediaPlayer()
-        mp?.setDataSource(lastSong)
-        mp?.prepareAsync()
+       // mp?.setDataSource(lastso)
+       // mp?.prepareAsync()
 
     view.play.setOnLongClickListener {   // stop button
         if (mp!!.isPlaying) {
@@ -70,11 +86,13 @@ class PlayFragment() : Fragment(), Parcelable {
 
     view.play.setOnClickListener { //play pause
         if (!mp!!.isPlaying) {
-           mp?.start()
+            //startForgroundService(Intent(activity, PlayMusicService::class.java))
+            requireActivity().startService(Intent(activity, PlayMusicService::class.java))
+           /*mp?.start()
             mp?.seekTo(time!!)
             initializeSeekBar()
             view.songmax.text = toMandS(mp!!.duration.toLong())
-            view.play.setImageResource(R.drawable.pause)
+            view.play.setImageResource(R.drawable.pause)*/
         } else {
            mp?.pause()
             view.play.setImageResource(R.drawable.play)
@@ -83,6 +101,7 @@ class PlayFragment() : Fragment(), Parcelable {
         lastTime = mp!!.currentPosition
         view.loop.setOnClickListener {
             mp?.isLooping = true
+            loop.isPressed = true
         }
 
             if (isNightModeOn){

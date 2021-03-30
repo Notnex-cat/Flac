@@ -33,6 +33,7 @@
             </intent-filter>
         </activity>
         <service android:name=".service.PlayMusicService"/>
+        <service android:name=".service.PlaybackService"/>
     </application>
 
 </manifest>

@@ -1,6 +1,8 @@
 package com.example.flacsearcher
 
 import android.Manifest
+import android.app.Application
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
@@ -13,16 +15,21 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.flacsearcher.adapters.SongListAdapter
 import com.example.flacsearcher.fragments.PlayFragment
 import com.example.flacsearcher.fragments.SettingsFragment
 import com.example.flacsearcher.fragments.WebSearchFragment
+import com.example.flacsearcher.model.SongModel
+import com.example.flacsearcher.service.PlayMusicService
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_scrolling.*
+
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
-
-    var playing: Boolean = false
-
+    private var songModelData: ArrayList<SongModel> = ArrayList()
+    private var songListAdapter: SongListAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -33,6 +40,15 @@ class MainActivity : AppCompatActivity() {
         val appSettingPrefs: SharedPreferences = getSharedPreferences("AppSettingPrefs", 0)
         val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
         val isNightModeOn: Boolean = appSettingPrefs.getBoolean("NightMode", true)
+
+        songListAdapter = SongListAdapter(songModelData, applicationContext)
+        val layoutManager = LinearLayoutManager(applicationContext)
+        //recycle_view.layoutManager = layoutManager
+        //recycle_view.adapter = songListAdapter
+        val songListAdapter = Intent(this, SongListAdapter::class.java)
+        this.startService(songListAdapter)
+       // val playMusicService = Intent(this, PlayMusicService::class.java)
+        //this.startService(playMusicService)
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
@@ -81,4 +97,10 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Жмакни ещё раз, если смелый", Toast.LENGTH_SHORT).show()
             Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 1000)
         }
+    class MyApp : Application() {
+        override fun onCreate() {
+            super.onCreate()
+            startService(Intent(this, PlayMusicService::class.java))
+        }
+    }
 }

@@ -7,7 +7,6 @@ import android.database.Cursor
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flacsearcher.adapters.SongListAdapter
@@ -32,7 +31,7 @@ class Songlist : AppCompatActivity() {
         setContentView(R.layout.activity_songlist)
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
         lastSong = pref?.getString("last", null)
-        Toast.makeText(this, "last song is:$lastSong", Toast.LENGTH_SHORT).show()
+       // Toast.makeText(this, "last song is:$lastSong", Toast.LENGTH_SHORT).show()
 
         songListAdapter = SongListAdapter(songModelData, applicationContext)
         val layoutManager = LinearLayoutManager(applicationContext)
@@ -58,16 +57,18 @@ class Songlist : AppCompatActivity() {
             if (mp == null) {
                 mp = MediaPlayer()
                 mp!!.setDataSource(lastSong)
-                mp!!.prepare()
-                mp!!.start()
+                mp!!.prepareAsync()
+                mp!!.setOnPreparedListener {
+                    mp!!.start()}
                 fab.setImageResource(R.drawable.pause)
                 Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             } else {
                 mp?.pause()
                 fab.setImageResource(R.drawable.play)
-                Snackbar.make(view, "Stop playing...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Pause playing...", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
+                mp = null
             }
         }
     }

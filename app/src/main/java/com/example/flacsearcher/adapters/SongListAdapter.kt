@@ -37,7 +37,6 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
     }
 
     override fun onBindViewHolder(holder: SongListViewHolder, position: Int) {
-
         val model = mSongModel[position]
         songName = model.mSongName
         val songDuration = toMandS(model.mSongDuration.toLong())
