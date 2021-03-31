@@ -2,6 +2,7 @@ package com.example.flacsearcher
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.media.MediaPlayer
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flacsearcher.adapters.SongListAdapter
 import com.example.flacsearcher.model.SongModel
+import com.example.flacsearcher.service.PlayMusicService
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -54,12 +56,14 @@ class Songlist : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
         findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout).title = "Playlist"
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
+
             if (mp == null) {
-                mp = MediaPlayer()
+                startService(Intent(this, PlayMusicService::class.java))
+               /* mp = MediaPlayer()
                 mp!!.setDataSource(lastSong)
                 mp!!.prepareAsync()
                 mp!!.setOnPreparedListener {
-                    mp!!.start()}
+                    mp!!.start()}*/
                 fab.setImageResource(R.drawable.pause)
                 Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()

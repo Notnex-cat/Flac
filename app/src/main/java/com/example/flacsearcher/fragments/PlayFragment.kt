@@ -13,12 +13,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
 import com.example.flacsearcher.adapters.SongListAdapter
 import com.example.flacsearcher.service.PlayMusicService
+import com.example.flacsearcher.service.PlaybackService
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 import java.util.concurrent.TimeUnit
@@ -70,8 +72,8 @@ class PlayFragment() : Fragment(), Parcelable {
         view.seekbar.max = timeMax as Int
         view.seekbar.progress = time as Int
         mp = MediaPlayer()
-       // mp?.setDataSource(lastso)
-       // mp?.prepareAsync()
+        mp?.setDataSource(lastSong)
+        mp?.prepareAsync()
 
     view.play.setOnLongClickListener {   // stop button
         if (mp!!.isPlaying) {
@@ -86,16 +88,18 @@ class PlayFragment() : Fragment(), Parcelable {
 
     view.play.setOnClickListener { //play pause
         if (!mp!!.isPlaying) {
-            //startForgroundService(Intent(activity, PlayMusicService::class.java))
             requireActivity().startService(Intent(activity, PlayMusicService::class.java))
-           /*mp?.start()
             mp?.seekTo(time!!)
             initializeSeekBar()
             view.songmax.text = toMandS(mp!!.duration.toLong())
-            view.play.setImageResource(R.drawable.pause)*/
+            view.play.setImageResource(R.drawable.pause)
+
         } else {
-           mp?.pause()
+
             view.play.setImageResource(R.drawable.play)
+            Toast.makeText(activity, "pause", Toast.LENGTH_SHORT).show()
+           // requireActivity().startService(Intent(activity, PlayMusicService::pausePlayer))
+
             }
         }
         lastTime = mp!!.currentPosition
@@ -144,7 +148,7 @@ class PlayFragment() : Fragment(), Parcelable {
         editor?.putInt("currentTim", currentTim)
         editor?.apply()
     }
-    private fun saveData1(timMax: Int) {
+    fun saveData1(timMax: Int) {
         val editor = pref?.edit()
         editor?.putInt("timMax", timMax)
         editor?.apply()

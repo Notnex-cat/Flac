@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.flacsearcher.service
 
 import android.app.Notification
@@ -13,9 +15,11 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.test.core.app.ApplicationProvider
 import com.example.flacsearcher.MainActivity
 import com.example.flacsearcher.R
+import com.example.flacsearcher.adapters.SongListAdapter
 import com.mtechviral.mplaylib.MusicFinder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -28,8 +32,9 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         //song list
         private var songs: ArrayList<MusicFinder.Song>? = null
 
-        //current position
-        private var songPosn = 0
+    private var currentPos: Int = 0
+    private var musicDataList: ArrayList<String> = ArrayList()
+    private var currentSong: String? = null
 
         //binder
         private val musicBind: IBinder = MusicBinder()
@@ -44,7 +49,7 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
             //create the service
             super.onCreate()
             //initialize position
-            songPosn = 0
+            currentPos = 0
             //random
             rand = Random()
             //create player
@@ -52,23 +57,26 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
             //initialize
             initMusicPlayer()
         }
-
-        fun initMusicPlayer() {
+    
+    fun initMusicPlayer() {
             //set player properties
-            player!!.setWakeMode(
-                ApplicationProvider.getApplicationContext(),
-                PowerManager.PARTIAL_WAKE_LOCK
-            )
+            //
+          //  player!!.setWakeMode(
+//                ApplicationProvider.getApplicationContext(),
+              //  PowerManager.PARTIAL_WAKE_LOCK
+           // )
             player!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
             //set listeners
             player!!.setOnPreparedListener(this)
             player!!.setOnCompletionListener(this)
             player!!.setOnErrorListener(this)
+           // Toast.makeText(this, songs.toString(), Toast.LENGTH_SHORT).show()
         }
 
         //pass song list
         fun setList(theSongs: ArrayList<MusicFinder.Song>?) {
             songs = theSongs
+            Log.d("frfrfr", songs.toString())
         }
 
         //binder
@@ -93,8 +101,9 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         fun playSong() {
             //play
             player!!.reset()
+
             //get song
-            val playSong: MusicFinder.Song = songs!![songPosn]
+            val playSong: MusicFinder.Song = songs!![currentPos]
             //get title
             songTitle = playSong.title
             //get id
@@ -107,6 +116,8 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
             //set the data source
             try {
                 player!!.setDataSource(ApplicationProvider.getApplicationContext(), trackUri)
+
+                //player!!.setDataSource(ApplicationProvider.getApplicationContext(), trackUri)
             } catch (e: Exception) {
                 Log.e("MUSIC SERVICE", "Error setting data source", e)
             }
@@ -115,13 +126,14 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
 
         //set the song
         fun setSong(songIndex: Int) {
-            songPosn = songIndex
+            currentPos = songIndex
         }
 
         override fun onCompletion(mp: MediaPlayer) {
             //check if playback has reached the end of a track
             if (player!!.currentPosition > 0) {
                 mp.reset()
+
                 playNext()
             }
         }
@@ -135,6 +147,7 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         override fun onPrepared(mp: MediaPlayer) {
             //start playback
             mp.start()
+            Toast.makeText(this, "gdgg"+ songs.toString(), Toast.LENGTH_SHORT).show()
             //notification
             val notIntent = Intent(this, MainActivity::class.java)
             notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -158,7 +171,7 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
             get() = player!!.currentPosition
 
         val dur: Int
-            get() = player!!.getDuration
+            get() = player!!.duration
         val isPng: Boolean
             get() = player!!.isPlaying
 
@@ -175,22 +188,22 @@ class PlaybackService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         }
         //skip to previous track
         fun playPrev() {
-            songPosn--
-            if (songPosn < 0) songPosn = songs!!.size - 1
+            currentPos--
+            if (currentPos < 0) currentPos = songs!!.size - 1
             playSong()
         }
 
         //skip to next
         fun playNext() {
             if (shuffle) {
-                var newSong = songPosn
-                while (newSong == songPosn) {
+                var newSong = currentPos
+                while (newSong == currentPos) {
                     newSong = rand!!.nextInt(songs!!.size)
                 }
-                songPosn = newSong
+                currentPos = newSong
             } else {
-                songPosn++
-                if (songPosn >= songs!!.size) songPosn = 0
+                currentPos++
+                if (currentPos >= songs!!.size) currentPos = 0
             }
             playSong()
         }

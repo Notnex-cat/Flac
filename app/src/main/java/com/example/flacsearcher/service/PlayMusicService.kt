@@ -11,14 +11,13 @@ import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
+import kotlinx.android.synthetic.main.fragment_play.*
 import android.util.Log
-import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
-import com.example.flacsearcher.MainActivity
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
 import com.example.flacsearcher.adapters.SongListAdapter
-import com.example.flacsearcher.fragments.PlayFragment
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -43,12 +42,14 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
 
     //title of current song
     private var songTitle = ""
+    private var lastso: String? = null
 
     //shuffle flag and random
     private var shuffle = false
     private var rand: Random? = null
 
     override fun onCreate() {
+
         //create the service
         super.onCreate()
         //random
@@ -57,38 +58,59 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         mp = MediaPlayer()
         //initialize
         // initMusicPlayer()
+    pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
+    lastSong = pref?.getString("last", null)
+        mp = MediaPlayer()
+        mp!!.setDataSource(lastSong)
+        mp!!.prepare()
+      onControl()
+    }
+
+    private fun onControl() {
+        if (!mp!!.isPlaying){
+            onPlay()
+        }else{
+            pausePlayer()
+        }
+    }
+
+    fun onPlay() {
+            mp!!.setOnPreparedListener {
+                mp!!.start()}
+            saveData(lastSong.toString())
+    }
+
+    fun pausePlayer() {
+            Toast.makeText(this,"pause", Toast.LENGTH_SHORT).show()
+        mp!!.pause()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         loadData()
-        musicDataList = intent!!.getStringArrayListExtra(SongListAdapter.MUSICLIST)!!
+    try {
+        musicDataList = intent?.getStringArrayListExtra(SongListAdapter.MUSICLIST)!!
         currentPos = intent.getIntExtra(SongListAdapter.MUSICITEMPOS, 0)
         currentSong = musicDataList[currentPos]
         lastSong = musicDataList[currentPos]
-        pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
+
         poss = currentPos.toString()
         songs = musicDataList
-        Toast.makeText(this, "dfffd", Toast.LENGTH_SHORT).show()
-        fun onCostomItemClick(view: View, pos: Int) {
-        val musicDataIntent = Intent(this, MainActivity::class.java)
-           // musicDataIntent.putStringArrayListExtra(SongListAdapter.MUSICLIST,allMusicList)
-        musicDataIntent.putExtra(poss, pos)
-            musicDataIntent.putExtra(lastSong, lasts)
-        this.startActivity(musicDataIntent)}
 
-        /*if (mp != null) {
+        if (mp != null) {
             mp!!.stop()
             mp!!.release()
             mp = null
         }
         mp = MediaPlayer()
-        mp!!.setDataSource(musicDataList[currentPos])
+        mp!!.setDataSource(lastSong)
         mp!!.prepare()
-        mp!!.setOnPreparedListener { 
-        mp!!.start()}*/
+        mp!!.setOnPreparedListener {
+        mp!!.start()}
         saveData(lastSong.toString())
         savePos(poss.toInt())
-        return super.onStartCommand(intent, flags, startId)
+    } catch (e: Exception) {
+        Log.e("MUSIC SERVICE", "Error setting data source", e)}
+    return super.onStartCommand(intent, flags, startId)
     }
 
     private fun loadData() {
@@ -118,8 +140,6 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
             mp!!.setOnCompletionListener(this)
             mp!!.setOnErrorListener(this)
         }*/
-
-
 
 
         //binder
@@ -212,9 +232,7 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
  val isPng: Boolean
      get() = mp!!.isPlaying
 
- fun pausePlayer() {
-     mp!!.pause()
- }
+
 
  fun seek(posn: Int) {
      mp!!.seekTo(posn)

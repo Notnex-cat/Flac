@@ -32,7 +32,9 @@
                 <data android:mimeType="audio/*" />
             </intent-filter>
         </activity>
-        <service android:name=".service.PlayMusicService"/>
+        <service android:name=".service.PlayMusicService"
+            android:enabled="true"
+            android:exported="true"/>
         <service android:name=".service.PlaybackService"/>
     </application>
 

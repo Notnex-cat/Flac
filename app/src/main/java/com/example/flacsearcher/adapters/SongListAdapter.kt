@@ -13,6 +13,7 @@ import com.example.flacsearcher.Interface.CostomItemClickListener
 import com.example.flacsearcher.R
 import com.example.flacsearcher.model.SongModel
 import com.example.flacsearcher.service.PlayMusicService
+import com.example.flacsearcher.service.PlaybackService
 import java.util.concurrent.TimeUnit
 
 class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):RecyclerView.Adapter<SongListAdapter.SongListViewHolder>() {
