@@ -10,33 +10,42 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import kotlinx.android.synthetic.main.fragment_play.*
 import android.util.Log
-import android.widget.ImageButton
 import android.widget.Toast
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
 import com.example.flacsearcher.adapters.SongListAdapter
+import com.example.flacsearcher.fragments.PlayFragment
+import kotlinx.android.synthetic.main.fragment_play.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
 class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
     MediaPlayer.OnCompletionListener {
+    internal lateinit var mp: MediaPlayer
     companion object{
     var poss = "pos"
+            var cur = "currentpos"
         var lasts = "lastsong"
+
 }
+
     private var lastSong: String? = null
     private var pref: SharedPreferences? = null
     private var currentSong: String? = null
     private var currentPos: Int = 0
+    private var seekto: Int = 0
     private var musicDataList: ArrayList<String> = ArrayList()
+    private var lastTime: Int? = null  // current time save
+    private var timemax: Int? = null //save
+    private var isPng: Int? = null
 
-    private var mp: MediaPlayer? = null
     //song list
     private var songs: ArrayList<String>? = null
-
+    private var time: Int? = null  // current time read
     //binder
     private val musicBind: IBinder = MusicBinder()
 
@@ -60,29 +69,72 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         // initMusicPlayer()
     pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
     lastSong = pref?.getString("last", null)
+        time = pref?.getInt("currentTim", 0)
+        isPng = pref?.getInt("isPng", 0)!!
+
         mp = MediaPlayer()
-        mp!!.setDataSource(lastSong)
-        mp!!.prepare()
+        mp.setDataSource(lastSong)
+        mp.prepare()
       onControl()
     }
 
     private fun onControl() {
-        if (!mp!!.isPlaying){
-            onPlay()
+        if (!mp.isPlaying){
+            onPlay(Intent(), mp.currentPosition)
         }else{
             pausePlayer()
         }
     }
 
-    fun onPlay() {
-            mp!!.setOnPreparedListener {
-                mp!!.start()}
-            saveData(lastSong.toString())
+    private fun onPlay(intent: Intent?, pos: Int) {
+            mp.setOnPreparedListener {
+                mp.seekTo(time!!)
+                seekto = intent!!.getIntExtra(PlayFragment.curto, 0)
+                cur = mp.currentPosition.toString()
+                initializeSeekBar(pos = mp.currentPosition)
+                mp.start()
+                isPng = 0
+                saveIsPng(isPng)
+            }
+
+        saveData(lastSong.toString())
+        val musicDataIntent = Intent(this@PlayMusicService, PlayFragment::class.java)
+        musicDataIntent.putExtra(cur, pos)
     }
 
-    fun pausePlayer() {
+    private fun initializeSeekBar(pos: Int) {
+        val handler = Handler()
+        handler.postDelayed(object: Runnable{
+            override fun run() {
+                try {
+                    val musicDataIntent = Intent(this@PlayMusicService, PlayFragment::class.java)
+                    musicDataIntent.putExtra(cur, pos)
+                    //seekbar.progress = mp!!.currentPosition
+                        handler.postDelayed(this,250)
+                    lastTime = mp.currentPosition
+                    saveCurrentTime(lastTime!!.toInt())
+                    time = pref?.getInt("currentTim", 0)
+
+                   // mp.seekTo(seekto)
+
+                    timemax = mp.duration
+                    saveMaxTime(timemax!!.toInt())
+                    //currentTime.text = toMandS(mp!!.currentPosition.toLong())
+                }catch (e: Exception){
+                }
+            }
+        }, 0)
+    }
+
+    private fun pausePlayer() {
             Toast.makeText(this,"pause", Toast.LENGTH_SHORT).show()
-        mp!!.pause()
+        mp.pause()
+    }
+
+    private fun saveCurrentTime(currentTim: Int) {
+        val editor = pref?.edit()
+        editor?.putInt("currentTim", currentTim)
+        editor?.apply()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -96,18 +148,22 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         poss = currentPos.toString()
         songs = musicDataList
 
-        if (mp != null) {
-            mp!!.stop()
-            mp!!.release()
-            mp = null
-        }
+        mp.stop()
+        mp.release()
+        //mp = null
         mp = MediaPlayer()
-        mp!!.setDataSource(lastSong)
-        mp!!.prepare()
-        mp!!.setOnPreparedListener {
-        mp!!.start()}
+        mp.setDataSource(lastSong)
+        mp.prepare()
+        mp.setOnPreparedListener {
+        mp.start()}
+        isPng = 1
+        saveIsPng(isPng)
         saveData(lastSong.toString())
         savePos(poss.toInt())
+        initializeSeekBar(pos = mp.currentPosition)
+        lastTime = mp.currentPosition
+        saveCurrentTime(lastTime!!.toInt())
+        time = pref?.getInt("currentTim", 0)
     } catch (e: Exception) {
         Log.e("MUSIC SERVICE", "Error setting data source", e)}
     return super.onStartCommand(intent, flags, startId)
@@ -123,24 +179,22 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         editor?.putString("last", res)
         editor?.apply()
     }
+    private fun saveIsPng(png: Int?) {
+        val editor = pref?.edit()
+            editor?.putInt("isPng", png!!)
+        editor?.apply()
+    }
     private fun savePos(pos: Int) {
         val editor = pref?.edit()
         editor?.putInt("pos", pos)
         editor?.apply()
     }
-       /* fun initMusicPlayer() {
-            //set player properties
-            mp!!.setWakeMode(
-                ApplicationProvider.getApplicationContext(),
-                PowerManager.PARTIAL_WAKE_LOCK
-            )
-            mp!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
-            //set listeners
-            mp!!.setOnPreparedListener(this)
-            mp!!.setOnCompletionListener(this)
-            mp!!.setOnErrorListener(this)
-        }*/
 
+    fun saveMaxTime(timMax: Int) {
+        val editor = pref?.edit()
+        editor?.putInt("timMax", timMax)
+        editor?.apply()
+    }
 
         //binder
         inner class MusicBinder : Binder() {
@@ -149,108 +203,67 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         }
 
         //activity will bind to service
-        override fun onBind(intent: Intent?): IBinder {
-            return musicBind
+        override fun onBind(intent: Intent?): IBinder? {
+            return null
         }
 
         //release resources when unbind
         override fun onUnbind(intent: Intent?): Boolean {
-            mp!!.stop()
-            mp!!.release()
+           // mp.stop()
+            //mp.release()
             return false
         }
+            //set the song
+            fun setSong(songIndex: Int) {
+                currentPos = songIndex
+            }
 
-        //play a song
-        private fun playSong() {
-    /*  //play
-     mp!!.reset()
-     //get song
-     val playSong: String = songs!![currentPos]
-     //get title
-    songTitle = playSong.title
-     //get i     val currSong: Long = playSong.id
-     //set uri
-     val trackUri: Uri = ContentUris.withAppendedId(
-         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-         currSong
-     )*/
-     //set the data source
-     try {
-         mp!!.setDataSource(musicDataList[currentPos])
-     } catch (e: Exception) {
-         Log.e("MUSIC SERVICE", "Error setting data source", e)
-     }
-     mp!!.prepareAsync()
- }
 
- //set the song
- fun setSong(songIndex: Int) {
-     currentPos = songIndex
- }
+            override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {
+                Log.v("MUSIC PLAYER", "Playback Error")
+                //mp.reset()
+                return false
+            }
 
- override fun onCompletion(mp: MediaPlayer) {
-     //check if playback has reached the end of a track
-     if (mp.currentPosition > 0) {
-         mp.reset()
-         playNext()
-     }
- }
+            override fun onPrepared(mp: MediaPlayer) {
+                //start playback
+                //mp.start()
+                //notification
+                val notIntent = Intent(this, Songlist::class.java)
+                notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                val pendInt = PendingIntent.getActivity(
+                    this, 0,
+                    notIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                )
+                val builder: Notification.Builder = Notification.Builder(this)
+                builder.setContentIntent(pendInt)
+                    .setSmallIcon(R.drawable.play)
+                    .setTicker(songTitle)
+                    .setOngoing(true)
+                    .setContentTitle("Playing")
+                    .setContentText(songTitle)
+                val not: Notification = builder.build()
+                //startForeground(NOTIFY_ID, not)
+            }
 
- override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {
-     Log.v("MUSIC PLAYER", "Playback Error")
-     mp.reset()
-     return false
- }
+            //playback methods
+            val posn: Int
+            get() = mp.currentPosition
 
- override fun onPrepared(mp: MediaPlayer) {
-     //start playback
-     mp.start()
-     //notification
-     val notIntent = Intent(this, Songlist::class.java)
-     notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-     val pendInt = PendingIntent.getActivity(
-         this, 0,
-         notIntent, PendingIntent.FLAG_UPDATE_CURRENT
-     )
-     val builder: Notification.Builder = Notification.Builder(this)
-     builder.setContentIntent(pendInt)
-         .setSmallIcon(R.drawable.play)
-         .setTicker(songTitle)
-         .setOngoing(true)
-         .setContentTitle("Playing")
-         .setContentText(songTitle)
-     val not: Notification = builder.build()
-     //startForeground(NOTIFY_ID, not)
- }
-
- //playback methods
- val posn: Int
-     get() = mp!!.currentPosition
-
- val dur: Int
-     get() = mp!!.duration
- val isPng: Boolean
-     get() = mp!!.isPlaying
+            val dur: Int
+            get() = mp.duration
 
 
 
- fun seek(posn: Int) {
-     mp!!.seekTo(posn)
- }
-
- fun go() {
-     mp!!.start()
- }
-
- //skip to previous track
- fun playPrev() {
+            //skip to previous track
+            /*fun playPrev() {
      currentPos--
      if (currentPos < 0) currentPos = songs!!.size - 1
      playSong()
- }
+ }*/
 
- //skip to next
- private fun playNext() {
+            //skip to next
+            /*private fun playNext() {
      if (shuffle) {
          var newSong = currentSong
          while (newSong == currentSong) {
@@ -262,19 +275,29 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
          if (currentPos >= songs!!.size) currentPos = 0
      }
      playSong()
- }
+ }*/
 
- override fun onDestroy() {
-     stopForeground(true)
- }
+            override fun onDestroy() {
+                stopForeground(true)
+                isPng = 0
+                saveIsPng(isPng)
+            }
 
- //toggle shuffle
- fun setShuffle() {
-     shuffle = if (shuffle){
-         false
- }else {
-         true
-     }
- }
+            //toggle shuffle
+            fun setShuffle() {
+                shuffle = if (shuffle) {
+                    false
+                } else {
+                    true
+                }
+            }
+
+    override fun onCompletion(mp: MediaPlayer?) {
+        //check if playback has reached the end of a track
+        if (mp?.currentPosition!! > 0) {
+            //mp.reset()
+            //playNext()
+        }
+    }
 
 }

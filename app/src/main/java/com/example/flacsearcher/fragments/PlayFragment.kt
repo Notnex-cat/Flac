@@ -4,45 +4,42 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
-import android.os.Bundle
-import android.os.Handler
-import android.os.Parcel
-import android.os.Parcelable
+import android.os.*
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.flacsearcher.R
 import com.example.flacsearcher.Songlist
 import com.example.flacsearcher.adapters.SongListAdapter
 import com.example.flacsearcher.service.PlayMusicService
-import com.example.flacsearcher.service.PlaybackService
 import kotlinx.android.synthetic.main.fragment_play.*
 import kotlinx.android.synthetic.main.fragment_play.view.*
 import java.util.concurrent.TimeUnit
 
 
 @Suppress("DEPRECATION")
-class PlayFragment() : Fragment(), Parcelable {
+open class PlayFragment() : Fragment(), Parcelable {
     private var lastSong: String? = null
     private var pref: SharedPreferences? = null
     private var mp: MediaPlayer?=null
     private var lastTime: Int? = null  // current time save
     private var time: Int? = null  // current time read
-    private var currentPos: Int = 0
     private var timeMax: Int? = null//read
-    private var timemax: Int? = null //save
-    private var musicDataList: ArrayList<String> = ArrayList()
-    private var lastso: String? = null
+    private var currentPosit: Int = 0
+    private var isPng: Int? = null
+
 
     constructor(parcel: Parcel) : this() {
         lastSong = parcel.readString()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -55,20 +52,12 @@ class PlayFragment() : Fragment(), Parcelable {
         lastSong = pref?.getString("last", null)
         time = pref?.getInt("currentTim", 0)
         timeMax = pref?.getInt("timMax", 0)
-        fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-            musicDataList = intent!!.getStringArrayListExtra(SongListAdapter.MUSICLIST)!!
-           currentPos = intent.getIntExtra(PlayMusicService.poss, 0)
-            lastso = intent.getStringExtra(PlayMusicService.lasts)
-           /* val fragmentTransaction: FragmentTransaction = requireFragmentManager().beginTransaction()
-            fragmentTransaction.detach(PlayFragment)
-            fragmentTransaction.attach(PlayFragment)
-            fragmentTransaction.commit()*/
-           return onStartCommand(intent, flags, startId)
-        }
+        isPng = pref?.getInt("isPng", 0)!!
+        Log.d("png", isPng.toString())
+
+        requireActivity().startForegroundService(Intent(activity, SongListAdapter::class.java))
         view.currentTime.text = toMandS(time!!.toLong())
         view.songmax.text = toMandS(timeMax!!.toLong())
-        Log.d("rtfrt1", currentPos.toString())
-        Log.d("rtfrt2", lastso.toString())
         view.seekbar.max = timeMax as Int
         view.seekbar.progress = time as Int
         mp = MediaPlayer()
@@ -86,22 +75,33 @@ class PlayFragment() : Fragment(), Parcelable {
         true
     }
 
+
+
+
     view.play.setOnClickListener { //play pause
-        if (!mp!!.isPlaying) {
-            requireActivity().startService(Intent(activity, PlayMusicService::class.java))
+        requireActivity().startService(Intent(activity, PlayMusicService::class.java))
+
+        isPng = 1
+        saveIsPng(isPng)
+    }
+
+        if (isPng == 1) {
             mp?.seekTo(time!!)
             initializeSeekBar()
             view.songmax.text = toMandS(mp!!.duration.toLong())
             view.play.setImageResource(R.drawable.pause)
-
+            isPng = 1
+            saveIsPng(isPng)
+            Toast.makeText(activity, "Play", Toast.LENGTH_SHORT).show()
         } else {
-
             view.play.setImageResource(R.drawable.play)
-            Toast.makeText(activity, "pause", Toast.LENGTH_SHORT).show()
-           // requireActivity().startService(Intent(activity, PlayMusicService::pausePlayer))
-
-            }
+            Toast.makeText(activity, "Pause", Toast.LENGTH_SHORT).show()
+            isPng = 0
+            saveIsPng(isPng)
         }
+
+
+
         lastTime = mp!!.currentPosition
         view.loop.setOnClickListener {
             mp?.isLooping = true
@@ -129,6 +129,11 @@ class PlayFragment() : Fragment(), Parcelable {
             override fun onProgressChanged(p0: SeekBar?, pos: Int, changed: Boolean) {
                 if (changed){
                     mp!!.seekTo(pos)
+                    curto = pos.toString()
+                   // saveCurrentTime(curto.toInt())
+
+                    val musicDataIntent = Intent(activity, PlayMusicService::class.java)
+                    musicDataIntent.putExtra(curto, pos)
                 }
             }
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -143,43 +148,42 @@ class PlayFragment() : Fragment(), Parcelable {
         }
             return view
         }
-    private fun saveData(currentTim: Int) {
+
+    private fun saveIsPng(res: Int?) {
         val editor = pref?.edit()
-        editor?.putInt("currentTim", currentTim)
+        if (res != null) {
+            editor?.putInt("isPng", res)
+        }
         editor?.apply()
     }
-    fun saveData1(timMax: Int) {
-        val editor = pref?.edit()
-        editor?.putInt("timMax", timMax)
-        editor?.apply()
-    }
+
     private fun initializeSeekBar() {
-        seekbar.max = mp!!.duration
         val handler = Handler()
         handler.postDelayed(object: Runnable{
             override fun run() {
                 try {
-                seekbar.progress = mp!!.currentPosition
-                    lastTime = mp!!.currentPosition
-                    saveData(lastTime!!.toInt())
-                    time = pref?.getInt("currentTim", 0)
+                    currentPosit = pref?.getInt("currentTim", 0)!!
+                seekbar.progress = currentPosit
+                    view?.currentTime?.text = toMandS(currentPosit.toLong())
+                  //  lastTime = mp!!.currentPosition
+                   // saveData(lastTime!!.toInt())
                 handler.postDelayed(this,250)
-                    timemax = mp!!.duration
-                    saveData1(timemax!!.toInt())
-                    currentTime.text = toMandS(mp!!.currentPosition.toLong())
+                    timeMax = pref?.getInt("timMax", 0)
+                    val max = timeMax
+                    songmax.text = toMandS(max!!.toLong())
+                    currentTime.text = toMandS(currentPosit.toLong())
             }catch (e: Exception){
-               // seekbar.progress = 0
             }
             }
         }, 0)
     }
-
     private fun toMandS(millis: Long): String {
         return String.format(
             "%2d:%2d",
             TimeUnit.MILLISECONDS.toMinutes(millis),
             TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(
                 TimeUnit.MILLISECONDS.toMinutes(millis)
+
             )
         )
     }
@@ -194,6 +198,7 @@ class PlayFragment() : Fragment(), Parcelable {
 
 
     companion object CREATOR : Parcelable.Creator<PlayFragment> {
+        var curto = "currentpostoseekbar"
         override fun createFromParcel(parcel: Parcel): PlayFragment {
             return PlayFragment(parcel)
         }

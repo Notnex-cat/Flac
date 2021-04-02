@@ -2,6 +2,7 @@ package com.example.flacsearcher.adapters
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,15 +45,18 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
 
         holder.songTV.text = songName
         holder.durationTV.text = songDuration
+
         holder.setOnCostomItemClickListener(object: CostomItemClickListener {
             override fun onCostomItemClick(view: View, pos: Int) {
                 for (i in 0 until mSongModel.size) {
                     allMusicList.add(mSongModel[i].mSongPath)
                 }
+                Log.d("Array Songs", allMusicList.toString())
                 val musicDataIntent = Intent(mContext, PlayMusicService::class.java)
                 musicDataIntent.putStringArrayListExtra(MUSICLIST,allMusicList)
                 musicDataIntent.putExtra(MUSICITEMPOS, pos)
                 mContext.startService(musicDataIntent)
+
             }
         })
     }
@@ -81,6 +85,7 @@ class SongListAdapter(SongModel:ArrayList<SongModel>, context: Context):Recycler
 
         override fun onClick(v: View?) {
             this.mCostomItemClickListener!!.onCostomItemClick(v!!, adapterPosition)
+
         }
     }
 }

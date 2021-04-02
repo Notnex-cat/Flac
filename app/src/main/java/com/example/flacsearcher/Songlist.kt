@@ -8,6 +8,7 @@ import android.database.Cursor
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flacsearcher.adapters.SongListAdapter
@@ -26,6 +27,7 @@ class Songlist : AppCompatActivity() {
     private var songModelData: ArrayList<SongModel> = ArrayList()
     private var songListAdapter: SongListAdapter? = null
     private var mp: MediaPlayer?=null
+    private var isPng: Int? = null
 
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +35,6 @@ class Songlist : AppCompatActivity() {
         setContentView(R.layout.activity_songlist)
         pref = getSharedPreferences("Table", Context.MODE_PRIVATE)
         lastSong = pref?.getString("last", null)
-       // Toast.makeText(this, "last song is:$lastSong", Toast.LENGTH_SHORT).show()
 
         songListAdapter = SongListAdapter(songModelData, applicationContext)
         val layoutManager = LinearLayoutManager(applicationContext)
@@ -53,27 +54,33 @@ class Songlist : AppCompatActivity() {
                 songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA))
             songModelData.add(SongModel(songName, songDuration, songPath))
         }
+        // isPng = pref?.getBoolean("isPng", false)!!
         setSupportActionBar(findViewById(R.id.toolbar))
         findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout).title = "Playlist"
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
-
-            if (mp == null) {
                 startService(Intent(this, PlayMusicService::class.java))
-               /* mp = MediaPlayer()
-                mp!!.setDataSource(lastSong)
-                mp!!.prepareAsync()
-                mp!!.setOnPreparedListener {
-                    mp!!.start()}*/
-                fab.setImageResource(R.drawable.pause)
+                isPng = 1
+                saveIsPng(isPng)
                 Snackbar.make(view, "Start playing...", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-            } else {
-                mp?.pause()
-                fab.setImageResource(R.drawable.play)
-                Snackbar.make(view, "Pause playing...", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-                mp = null
-            }
+                  .setAction("Action", null).show()
         }
+if (isPng==1){
+    fab.setImageResource(R.drawable.play)
+    isPng = 0
+    Toast.makeText(this, "play", Toast.LENGTH_SHORT).show()
+    saveIsPng(isPng)
+}else{
+    fab.setImageResource(R.drawable.pause)
+    Toast.makeText(this, "pAUSE", Toast.LENGTH_SHORT).show()
+    isPng = 1
+    saveIsPng(isPng)
+}
+
+    }
+    private fun saveIsPng(png: Int?) {
+        val editor = pref?.edit()
+            editor?.putInt("isPng", png!!)
+
+        editor?.apply()
     }
 }
