@@ -60,10 +60,11 @@ open class PlayFragment() : Fragment(), Parcelable {
         view.songmax.text = toMandS(timeMax!!.toLong())
         view.seekbar.max = timeMax as Int
         view.seekbar.progress = time as Int
-        mp = MediaPlayer()
-        mp?.setDataSource(lastSong)
-        mp?.prepareAsync()
-
+        if(lastSong!= null) {
+            mp = MediaPlayer()
+            mp?.setDataSource(lastSong)
+            mp?.prepareAsync()
+        }
     view.play.setOnLongClickListener {   // stop button
         if (mp!!.isPlaying) {
             mp!!.stop()
@@ -80,29 +81,29 @@ open class PlayFragment() : Fragment(), Parcelable {
 
     view.play.setOnClickListener { //play pause
         requireActivity().startService(Intent(activity, PlayMusicService::class.java))
-
+        initializeSeekBar()
+        view.songmax.text = toMandS(mp!!.duration.toLong())
         isPng = 1
         saveIsPng(isPng)
     }
 
-        if (isPng == 1) {
+        if (isPng == 0) {
             mp?.seekTo(time!!)
-            initializeSeekBar()
-            view.songmax.text = toMandS(mp!!.duration.toLong())
+
             view.play.setImageResource(R.drawable.pause)
-            isPng = 1
+            isPng = 0
             saveIsPng(isPng)
             Toast.makeText(activity, "Play", Toast.LENGTH_SHORT).show()
         } else {
             view.play.setImageResource(R.drawable.play)
             Toast.makeText(activity, "Pause", Toast.LENGTH_SHORT).show()
-            isPng = 0
+            isPng = 1
             saveIsPng(isPng)
         }
 
 
-
-        lastTime = mp!!.currentPosition
+if (lastSong!=null){
+        lastTime = mp!!.currentPosition}
         view.loop.setOnClickListener {
             mp?.isLooping = true
             loop.isPressed = true

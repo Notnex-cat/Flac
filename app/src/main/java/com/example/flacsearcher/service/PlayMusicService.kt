@@ -73,8 +73,9 @@ class PlayMusicService: Service(), MediaPlayer.OnPreparedListener, MediaPlayer.O
         isPng = pref?.getInt("isPng", 0)!!
 
         mp = MediaPlayer()
+        if (lastSong!=null){
         mp.setDataSource(lastSong)
-        mp.prepare()
+        mp.prepare()}
       onControl()
     }
 
